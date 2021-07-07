@@ -1,84 +1,143 @@
 <template>
-  <q-list bordered padding>
-    <q-item
-      tag="label"
-      v-ripple
-      v-for="todoTask in todoTasks"
-      :key="todoTask.id"
-    >
-      <q-item-section side top>
-        <q-checkbox
-          v-model="todoTask.isChecked"
-          v-on:click="toggleCheck(todoTask)"
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-item-label>{{ todoTask.title }}</q-item-label>
-        <q-item-label caption>
-          {{ todoTask.content }}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-  </q-list>
+  <q-page class="full-width">
+    <q-scroll-area class="absolute full-width full-height">
+      <q-list class="column">
+        <div class="col-12" v-for="todoTask in todoTasks" :key="todoTask.id">
+          <div
+            class="
+              row
+              justify-between
+              bg-grey-3
+              q-pa-sm
+              text-subtitle1 text-bold
+            "
+          >
+            <div class="col-11">{{ todoTask.title }}</div>
+            <div class="col-1">
+              <q-checkbox
+                v-model="checked"
+                v-on:click="removeTodoTask(todoTask)"
+              />
+            </div>
+          </div>
+          <div>
+            <textarea
+              class="taskContent"
+              v-model="todoTask.content"
+              @blur="editTodoTask(todoTask)"
+              placeholder="Pas de contenu"
+            ></textarea>
+          </div>
+        </div>
+      </q-list>
+      <div v-if="!todoTasks.length">
+        <p class="text-body1 absolute-center">Aucun élément</p>
+      </div>
+    </q-scroll-area>
+  </q-page>
 </template>
 
 <script>
 import { defineComponent } from 'vue';
+import firebase from 'firebase';
 import db from 'src/boot/firebase';
 
 export default defineComponent({
-  name: 'TodoTaskEl',
+  name: 'TodoTaskList',
   data() {
     return {
       todoTasks: [],
+      isCreationActive: false,
+      currentUser: null,
     };
   },
   methods: {
-    toggleCheck(todoTask) {
-      db.collection('todoTask')
+    editTodoTask(todoTask) {
+      db.collection(`users/${this.currentUser.uid}/todoList`)
         .doc(todoTask.id)
         .update({
-          isChecked: todoTask.isChecked,
+          content: todoTask.content,
         })
         .then(() => {
-          // eslint-disable-next-line no-console
+          // eslint-disable-next-line
           console.log('Document successfully updated!');
         })
         .catch((error) => {
           // The document probably doesn't exist.
-          // eslint-disable-next-line no-console
+          // eslint-disable-next-line
           console.error('Error updating document: ', error);
+        });
+    },
+    removeTodoTask(todoTask) {
+      db.collection(`users/${this.currentUser.uid}/todoList`)
+        .doc(todoTask.id)
+        .delete()
+        .then(() => {
+          // eslint-disable-next-line no-console
+          console.log('Document successfully removed!');
+        })
+        .catch((error) => {
+          // The document probably doesn't exist.
+          // eslint-disable-next-line no-console
+          console.error('Error removing document: ', error);
         });
     },
   },
   mounted() {
-    db.collection('todoTask').onSnapshot((snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const todoTaskChange = change.doc.data();
-        todoTaskChange.id = change.doc.id;
-        if (change.type === 'added') {
-          // eslint-disable-next-line no-console
-          console.log('New todoTask: ', change.doc.data());
-          this.todoTasks.push(todoTaskChange);
-        }
-        if (change.type === 'modified') {
-          // eslint-disable-next-line no-console
-          console.log('Modified todoTask: ', change.doc.data());
-          const index = this.todoTasks.findIndex(
-            (todoTask) => todoTask.id === todoTaskChange.id,
-          );
-          Object.assign(this.todoTasks[index], todoTaskChange);
-        }
-        if (change.type === 'removed') {
-          // eslint-disable-next-line no-console
-          console.log('Removed todoTask: ', change.doc.data());
-          const index = this.todoTasks.findIndex(
-            (todoTask) => todoTask.id === todoTaskChange.id,
-          );
-          this.todoTasks.splice(index, 1);
-        }
-      });
+    firebase.auth().onAuthStateChanged((user) => {
+      this.currentUser = user;
+      if (this.currentUser) {
+        db.collection(`users/${this.currentUser.uid}/todoList`).onSnapshot(
+          (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+              const todoTaskChange = change.doc.data();
+              todoTaskChange.id = change.doc.id;
+              if (change.type === 'added') {
+                // eslint-disable-next-line no-console
+                console.log('New todoTask: ', change.doc.data());
+                this.todoTasks.push(todoTaskChange);
+              }
+              if (change.type === 'modified') {
+                // eslint-disable-next-line no-console
+                console.log('Modified todoTask: ', change.doc.data());
+                const index = this.todoTasks.findIndex(
+                  (todoTask) => todoTask.id === todoTaskChange.id,
+                );
+                Object.assign(this.todoTasks[index], todoTaskChange);
+              }
+              if (change.type === 'removed') {
+                // eslint-disable-next-line no-console
+                console.log('Removed todoTask: ', change.doc.data());
+                const index = this.todoTasks.findIndex(
+                  (todoTask) => todoTask.id === todoTaskChange.id,
+                );
+                this.todoTasks.splice(index, 1);
+              }
+            });
+          },
+        );
+      }
     });
+  },
+  computed: {
+    checked: {
+      get() {
+        return false;
+      },
+      set() {},
+    },
   },
 });
 </script>
+<style lang="scss" scoped>
+.taskContent {
+  border: none;
+  resize: none;
+  outline: none !important;
+  width: 100%;
+}
+.rounded-top {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+</style>
