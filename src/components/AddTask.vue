@@ -75,14 +75,8 @@ export default {
       this.isCreationActive = false;
       db.collection(`users/${this.currentUser.uid}/todoList`)
         .add(newTodoTask)
-        .then((docRef) => {
-          // eslint-disable-next-line no-console
-          console.log('Document written with ID: ', docRef.id);
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error('Error adding document: ', error);
-        });
+        .then(() => {})
+        .catch(() => {});
       this.newQweetContent = '';
     },
   },

@@ -68,29 +68,15 @@ export default defineComponent({
         .update({
           content: todoTask.content,
         })
-        .then(() => {
-          // eslint-disable-next-line
-          console.log('Document successfully updated!');
-        })
-        .catch((error) => {
-          // The document probably doesn't exist.
-          // eslint-disable-next-line
-          console.error('Error updating document: ', error);
-        });
+        .then(() => {})
+        .catch(() => {});
     },
     removeTodoTask(todoTask) {
       db.collection(`users/${this.currentUser.uid}/todoList`)
         .doc(todoTask.id)
         .delete()
-        .then(() => {
-          // eslint-disable-next-line no-console
-          console.log('Document successfully removed!');
-        })
-        .catch((error) => {
-          // The document probably doesn't exist.
-          // eslint-disable-next-line no-console
-          console.error('Error removing document: ', error);
-        });
+        .then(() => {})
+        .catch(() => {});
     },
   },
   mounted() {
@@ -103,21 +89,15 @@ export default defineComponent({
               const todoTaskChange = change.doc.data();
               todoTaskChange.id = change.doc.id;
               if (change.type === 'added') {
-                // eslint-disable-next-line no-console
-                console.log('New todoTask: ', change.doc.data());
                 this.todoTasks.push(todoTaskChange);
               }
               if (change.type === 'modified') {
-                // eslint-disable-next-line no-console
-                console.log('Modified todoTask: ', change.doc.data());
                 const index = this.todoTasks.findIndex(
                   (todoTask) => todoTask.id === todoTaskChange.id,
                 );
                 Object.assign(this.todoTasks[index], todoTaskChange);
               }
               if (change.type === 'removed') {
-                // eslint-disable-next-line no-console
-                console.log('Removed todoTask: ', change.doc.data());
                 const index = this.todoTasks.findIndex(
                   (todoTask) => todoTask.id === todoTaskChange.id,
                 );
