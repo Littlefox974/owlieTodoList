@@ -1,18 +1,24 @@
 <template>
   <q-page class="full-width">
     <q-scroll-area class="absolute full-width full-height">
-      <q-list class="column">
+      <q-list class="column q-pa-md">
         <div class="col-12" v-for="todoTask in todoTasks" :key="todoTask.id">
           <div
             class="
               row
+              q-px-sm
               justify-between
               bg-grey-3
-              q-pa-sm
-              text-subtitle1 text-bold
+              rounded-top
+              items-center
             "
           >
-            <div class="col-11">{{ todoTask.title }}</div>
+            <div
+              class="col-11 text-subtitle1 text-bold"
+              @click="todoTask.expanded = !todoTask.expanded"
+            >
+              {{ todoTask.title }}
+            </div>
             <div class="col-1">
               <q-checkbox
                 v-model="checked"
@@ -21,12 +27,12 @@
             </div>
           </div>
           <div>
-            <textarea
-              class="taskContent"
-              v-model="todoTask.content"
+            <!--  -->
+            <TaskContent
+              v-model:content="todoTask.content"
+              v-model:expanded="todoTask.expanded"
               @blur="editTodoTask(todoTask)"
-              placeholder="Pas de contenu"
-            ></textarea>
+            ></TaskContent>
           </div>
         </div>
       </q-list>
@@ -41,9 +47,13 @@
 import { defineComponent } from 'vue';
 import firebase from 'firebase';
 import db from 'src/boot/firebase';
+import TaskContent from './TaskContent.vue';
 
 export default defineComponent({
   name: 'TodoTaskList',
+  components: {
+    TaskContent,
+  },
   data() {
     return {
       todoTasks: [],
@@ -130,12 +140,6 @@ export default defineComponent({
 });
 </script>
 <style lang="scss" scoped>
-.taskContent {
-  border: none;
-  resize: none;
-  outline: none !important;
-  width: 100%;
-}
 .rounded-top {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;

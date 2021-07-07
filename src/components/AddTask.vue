@@ -68,6 +68,7 @@ export default {
       const newTodoTask = {
         title: this.newTodoTaskTitle,
         content: '',
+        expanded: false,
       };
       // this.qweets.unshift(newQweet)
       db.collection(`users/${this.currentUser.uid}/todoList`)
