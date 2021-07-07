@@ -9,22 +9,23 @@
       @click="isCreationActive = true"
     />
     <q-input
+      class="task-title"
+      dark
       label-color="secondary"
       v-else
-      dark
-      bottom-slots
+      square
+      filled
       v-model="newTodoTaskTitle"
       label="Ajouter un élément"
       style="z-index=10000"
       @blur="isCreationActive = false"
+      @keydown.enter="addNewTodoTask"
     >
       <template v-slot:append>
-        <!-- @blur="isCreationActive = false" -->
         <q-btn
+          v-if="isCreationActive"
+          class="glossy"
           round
-          dense
-          flat
-          text-color="white"
           color="secondary"
           icon="add"
           @click="addNewTodoTask"
@@ -70,7 +71,8 @@ export default {
         content: '',
         expanded: false,
       };
-      // this.qweets.unshift(newQweet)
+      this.newTodoTaskTitle = '';
+      this.isCreationActive = false;
       db.collection(`users/${this.currentUser.uid}/todoList`)
         .add(newTodoTask)
         .then((docRef) => {
@@ -87,12 +89,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.open-todotask {
-  z-index: 2000;
-  position: relative;
-  right: 18rem;
-  top: 2em;
-}
 .add-todotask {
   z-index: 2000;
   position: relative;
@@ -104,5 +100,11 @@ export default {
   bottom: 0;
   left: 20px;
   transform: translateY(50%);
+}
+.task-title {
+  position: absolute;
+  bottom: 1px;
+  right: 0;
+  width: 80%;
 }
 </style>

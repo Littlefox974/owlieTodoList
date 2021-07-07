@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="q-pa-sm">
     <template v-if="currentUser">
-      <span> Bonjour </span> {{ currentUser.email }}
+      <p class="text-h6">Bonjour {{ currentUser.email }}</p>
       <q-btn
         label="Me déconnecter"
         @click="logout"
@@ -11,17 +11,20 @@
       </q-btn>
     </template>
     <form v-else>
-      <h5 class="mb-3 fw-normal">Me connecter</h5>
-      <span class="text-center">
-        Entrez vos indentifiants pour vous connecter
-      </span>
-      <div class="form-floating">
-        <q-input v-model="email" outlined type="email" label="Email" />
-      </div>
+      <p class="text-h6">Me connecter</p>
+      <p class="text-body1">Entrez vos indentifiants pour vous connecter</p>
       <div class="form-floating">
         <q-input
+          class="q-mt-md"
+          v-model="email"
+          filled
+          type="email"
+          label="Email"
+        />
+        <q-input
+          class="q-mt-md"
           v-model="password"
-          outlined
+          filled
           :type="isPwd ? 'password' : 'text'"
           label="Password"
         >
